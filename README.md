@@ -1,6 +1,7 @@
 # fund_management_sys
 
-> A Vue.js project
+> 模拟基金系统
+> vue + vur-router + vuex + axios + element-ui
 
 ## Build Setup
 
