@@ -10,7 +10,7 @@
 					<el-button type="primary" v-on:click="getFunds">查询</el-button>
 				</el-form-item>
 				<el-form-item>
-					<el-button type="primary" @click="handleAdd">添加基金</el-button>
+					<el-button type="primary" @click="handleAdd">基金上市</el-button>
 				</el-form-item>
 			</el-form>
 		</el-col>
@@ -51,9 +51,10 @@
 					<el-input v-model="editForm.name" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="基金状态">
+          <!-- <el-radio class="radio" v-model="editForm.status" label="已上市">已上市</el-radio> -->
 					<el-radio-group v-model="editForm.status">
-						<el-radio class="radio" :label="1">上市</el-radio>
-						<el-radio class="radio" :label="0">未上市</el-radio>
+						<el-radio class="radio" label="已上市">上市</el-radio>
+						<el-radio class="radio" label="未上市">未上市</el-radio>
 					</el-radio-group>
 				</el-form-item>
 				<el-form-item label="价格">
@@ -103,220 +104,213 @@
 </template>
 
 <script>
-	import util from '../../common/js/util'
-  import storage from '@/utils/storage'
-  import axios from 'axios'
-  import { add as addFund, get as getFund } from '@/services/fund'
-	//import NProgress from 'nprogress'
-	import { getUserListPage, removeUser, batchRemoveUser, editUser, addUser } from '../../api/api';
+import util from '../../common/js/util'
+import storage from '@/utils/storage'
+import axios from 'axios'
+import {
+  add as addFund,
+  get as getFund,
+  remove as removeFund,
+  update as updateFund,
+  batchRemove as batchRemoveFund
+} from '@/services/fund'
 
-	export default {
-		data() {
-			return {
-				filters: {
-					name: ''
-				},
-				funds: [],
-				total: 0,
-				page: 1,
-				listLoading: false,
-				sels: [],//列表选中列
+export default {
+  data() {
+    return {
+      filters: {
+        name: ''
+      },
+      funds: [],
+      total: 0,
+      page: 1,
+      listLoading: false,
+      sels: [], //列表选中列
 
-				editFormVisible: false,//编辑界面是否显示
-				editLoading: false,
-				editFormRules: {
-					name: [
-						{ required: true, message: '请输入姓名', trigger: 'blur' }
-					]
-				},
-				//编辑界面数据
-				editForm: {
-					id: 0,
-					name: '',
-					status: -1,
-					price: 0,
-					date: '',
-					desc: ''
-				},
-				addFormVisible: false,//新增界面是否显示
-				addLoading: false,
-				addFormRules: {
-					name: [
-						{ required: true, message: '请输入姓名', trigger: 'blur' }
-					]
-				},
-				//新增界面数据
-				addForm: {
-					name: '',
-					status: -1,
-					price: 0,
-					date: '',
-					desc: ''
-				}
+      editFormVisible: false, //编辑界面是否显示
+      editLoading: false,
+      editFormRules: {
+        name: [{
+          required: true,
+          message: '请输入基金名',
+          trigger: 'blur'
+        }]
+      },
+      //编辑界面数据
+      editForm: {
+        id: 0,
+        name: '',
+        status: -1,
+        price: 0,
+        date: '',
+        desc: ''
+      },
+      addFormVisible: false, //新增界面是否显示
+      addLoading: false,
+      addFormRules: {
+        name: [{
+          required: true,
+          message: '请输入基金名',
+          trigger: 'blur'
+        }]
+      },
+      //新增界面数据
+      addForm: {
+        name: '',
+        status: -1,
+        price: 0,
+        date: '',
+        desc: ''
+      }
 
-			}
-		},
-		methods: {
-			//性别显示转换
-			formatSex: function (row, column) {
-				return row.sex == 1 ? '男' : row.sex == 0 ? '女' : '未知';
-			},
-			handleCurrentChange(val) {
-				this.page = val;
-				this.getFunds();
-			},
-			//获取用户列表
-			async getFunds() {
-        this.listLoading = false
-        const token = storage.getSession('token')
-        const res = await getFund(token)
-        this.funds = res.data.FundList
-        console.log(this.funds)
-        // this.funds = res.data.FundList
-				// let para = {
-				// 	page: this.page,
-				// 	name: this.filters.name
-				// };
-    //     this.listLoading = false
-				// // this.listLoading = true;
-				// //NProgress.start();
-				// getUserListPage(para).then((res) => {
-				// 	this.total = res.data.total;
-				// 	this.funds = res.data.funds;
-				// 	this.listLoading = false;
-				// 	//NProgress.done();
-				// });
-			},
-			//删除
-			handleDel: function (index, row) {
-				this.$confirm('确认删除该记录吗?', '提示', {
-					type: 'warning'
-				}).then(() => {
-					this.listLoading = true;
-					//NProgress.start();
-					let para = { id: row.id };
-					removeUser(para).then((res) => {
-						this.listLoading = false;
-						//NProgress.done();
-						this.$message({
-							message: '删除成功',
-							type: 'success'
-						});
-						this.getFunds();
-					});
-				}).catch(() => {
-
-				});
-			},
-			//显示编辑界面
-			handleEdit: function (index, row) {
-				this.editFormVisible = true
-        const {
-          fundNo,
-          fundName,
-          fundPrice,
-          fundStatus,
-          fundDescribe,
-          fundCreateDate
-        } = row
-				this.editForm.id = fundNo
-        this.editForm.name = fundName
-        this.editForm.status = parseInt(fundStatus)
-        this.editForm.price = fundPrice
-        this.editForm.desc = fundDescribe
-        this.editForm.date = fundCreateDate
-			},
-			//显示新增界面
-			handleAdd: function () {
-				this.addFormVisible = true;
-				this.addForm = {
-					name: '',
-					status: -1,
-					price: 0,
-					date: '',
-					desc: ''
-				};
-			},
-			//编辑
-			editSubmit: function () {
-				// this.$refs.editForm.validate((valid) => {
-				// 	if (valid) {
-				// 		this.$confirm('确认提交吗？', '提示', {}).then(() => {
-				// 			this.editLoading = true;
-				// 			//NProgress.start();
-				// 			let para = Object.assign({}, this.editForm);
-				// 			para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
-				// 			editUser(para).then((res) => {
-				// 				this.editLoading = false;
-				// 				//NProgress.done();
-				// 				this.$message({
-				// 					message: '提交成功',
-				// 					type: 'success'
-				// 				});
-				// 				this.$refs['editForm'].resetFields();
-				// 				this.editFormVisible = false;
-				// 				this.getFunds();
-				// 			});
-				// 		});
-				// 	}
-				// });
-			},
-			//新增
-			async addSubmit() {
-        const token = storage.getSession('token')
-        console.log(this.addForm)
-        try {
-          await this.$confirm('确认添加基金吗？', '提示', {})
-          this.addLoading = true
-          const res = await addFund(this.addForm, token)
-          this.addLoading = false
-          console.log(res)
-          if (res.resultcode === 0) {
-            this.$message('添加基金成功！')
-            this.$router.push({ path: 'Table' })
-          } else if (res.resultcode === -1 && res.message === '基金名已经存在') {
-            this.$message(res.message)
-          } else if (res.resultcode === -1 && res.message === '您的token不合法或者过期了，请重新登陆') {
-            this.$message('登录已过期，请重新登录，谢谢！')
-            storage.removeSession('userNo')
-            storage.removeSession('token')
-            this.$router.push({ path: 'login' })
-          }
-        } catch (error) {
-          console.log(error)
+    }
+  },
+  methods: {
+    //性别显示转换
+    formatSex: function(row, column) {
+      return row.sex == 1 ? '男' : row.sex == 0 ? '女' : '未知';
+    },
+    handleCurrentChange(val) {
+      this.page = val;
+      this.getFunds();
+    },
+    //获取用户列表
+    async getFunds() {
+      this.listLoading = false
+      const token = storage.getSession('token')
+      const res = await getFund(token)
+      this.funds = res.data.FundList
+    },
+    //删除
+    handleDel: function(index, row) {
+      const fundNo = row.fundNo
+      const token = storage.getSession('token')
+      this.$confirm('确认删除该记录吗?', '提示', {
+        type: 'warning'
+      }).then(async () => {
+        this.listLoading = true
+        const res = await removeFund(fundNo, token)
+        if (res.resultcode === 0) {
+          this.listLoading = false
+          this.$message({
+            message: '刪除成功',
+            type: 'success'
+          })
+          this.getFunds()
         }
-			},
-			selsChange: function (sels) {
-				this.sels = sels;
-			},
-			//批量删除
-			batchRemove: function () {
-				var ids = this.sels.map(item => item.id).toString();
-				this.$confirm('确认删除选中记录吗？', '提示', {
-					type: 'warning'
-				}).then(() => {
-					this.listLoading = true;
-					//NProgress.start();
-					let para = { ids: ids };
-					batchRemoveUser(para).then((res) => {
-						this.listLoading = false;
-						//NProgress.done();
-						this.$message({
-							message: '删除成功',
-							type: 'success'
-						});
-						this.getFunds();
-					});
-				}).catch(() => {
+      }).catch(() => {
 
-				});
-			}
-		},
-		mounted() {
-			this.getFunds()
-		}
-	}
+      });
+    },
+    //显示编辑界面
+    handleEdit: function(index, row) {
+      this.editFormVisible = true
+      const {
+        fundNo,
+        fundName,
+        fundPrice,
+        fundStatus,
+        fundDescribe,
+        fundCreateDate
+      } = row
+      this.editForm.id = fundNo
+      this.editForm.name = fundName
+      this.editForm.status = fundStatus
+      console.log(this.editForm.status)
+      this.editForm.price = fundPrice
+      this.editForm.desc = fundDescribe
+      this.editForm.date = fundCreateDate
+    },
+    //显示新增界面
+    handleAdd: function() {
+      this.addFormVisible = true
+      this.addForm = {
+        name: '',
+        price: 0,
+        date: '',
+        desc: ''
+      };
+    },
+    //编辑
+    editSubmit: function() {
+      const token = storage.getSession('token')
+      this.$confirm('确认提交吗？', '提示', {}).then(async () => {
+        this.editLoading = true;
+        const res = await updateFund(this.editForm, token)
+        console.log(res)
+        if (res.resultcode === 0) {
+          this.editLoading = false
+          this.editFormVisible = false
+          this.$message({
+            message: '修改成功',
+            type: 'success'
+          })
+          this.getFunds()
+        }
+      }).catch(() => {
 
+      })
+    },
+    //新增
+    async addSubmit() {
+      const token = storage.getSession('token')
+      console.log(this.addForm)
+      try {
+        await this.$confirm('确认添加基金吗？', '提示', {})
+        this.addLoading = true
+        const res = await addFund(this.addForm, token)
+        this.addLoading = false
+        console.log(res)
+        if (res.resultcode === 0) {
+          this.$message('添加基金成功！')
+          this.addFormVisible = false
+          this.getFunds()
+        } else if (res.resultcode === -1 && res.message === '基金名已经存在') {
+          this.$message(res.message)
+        } else if (res.resultcode === -1 && res.message === '您的token不合法或者过期了，请重新登陆') {
+          this.$message('登录已过期，请重新登录，谢谢！')
+          storage.removeSession('userNo')
+          storage.removeSession('token')
+          this.$router.push({
+            path: 'login'
+          })
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    selsChange: function(sels) {
+      this.sels = sels;
+    },
+    //批量删除
+    batchRemove: function() {
+      const token = storage.getSession('token')
+      var ids = this.sels.map(item => item.fundNo).toString()
+      console.log(ids)
+      this.$confirm('确认删除选中记录吗？', '提示', {
+        type: 'warning'
+      }).then(async () => {
+        this.listLoading = true;
+        const res = await batchRemoveFund(ids, token)
+        console.log(res)
+        if (res.resultcode === 0) {
+          this.listLoading = false
+          this.$message({
+            message: '刪除成功',
+            type: 'success'
+          })
+        }
+        this.getFunds()
+      }).catch(() => {
+
+      });
+      this.getFunds()
+    }
+  },
+  mounted() {
+    this.getFunds()
+  }
+}
 </script>
 
 <style scoped>

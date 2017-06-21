@@ -16,9 +16,9 @@
 </template>
 
 <script>
-import { requestLogin } from '../api/api'
 import axios from 'axios'
 import storage from '@/utils/storage'
+import { get as doLogin } from '@/services/admin'
 //import NProgress from 'nprogress'
 export default {
   data() {
@@ -26,7 +26,7 @@ export default {
       logining: false,
       ruleForm2: {
         account: 'admin',
-        checkPass: '123456'
+        checkPass: '123'
       },
       rules2: {
         account: [{
@@ -52,14 +52,7 @@ export default {
       this.$refs.ruleForm2.resetFields();
     },
     async handleSubmit2(ev) {
-      var _this = this;
-
-      const res = await axios.get('http://localhost:8080/FMS/admin/adminLogin.action', {
-        params: {
-          userNo: 'admin',
-          userPwd: '123'
-        }
-      })
+      const res = await doLogin(this.ruleForm2.account, this.ruleForm2.checkPass)
       console.log(res)
       if (res.resultcode === 0) {
         const {

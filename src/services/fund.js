@@ -25,26 +25,44 @@ const get = async (token) => {
     }
   })
   return res
-  // res.data.FundList.map((value) => {
-  //   const {}
-  //     fundNo,
-  //     fundName,
-  //     fundPrice,
-  //     fundStatus,
-  //     fundDescribe,
-  //     fundCreateDate
-  // })
-  // return {
-  //   no: fundNo,
-  //   name: fundName,
-  //   price: fundPrice,
-  //   status: fundStatus,
-  //   desc: fundDescribe,
-  //   date: fundCreateDate
-  // }
+}
+
+const remove = async (fundNo, token) =>{
+  return await axios.get(`${API}/admin/adminDeleteFund.action`, {
+    params: {
+      'fund.FundNo': fundNo,
+      token
+    }
+  })
+}
+
+const batchRemove = async (fundNos, token) => {
+  return await axios.get(`${API}/admin/adminBatchDelete.action`, {
+    params: {
+      fundNoArr: fundNos,
+      token
+    }
+  })
+}
+
+const update = async ({ id, name, price, status, desc }, token) => {
+  console.log(typeof id)
+  return await axios.get(`${API}/admin/adminUpdateFund.action`, {
+    params: {
+      'fund.FundNo': id,
+      'fund.FundName': name,
+      'fund.FundPrice': price,
+      'fund.FundStatus': status,
+      'fund.FundDescribe': desc,
+      token
+    }
+  })
 }
 
 export {
   add,
-  get
+  get,
+  remove,
+  update,
+  batchRemove
 }
