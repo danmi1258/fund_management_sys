@@ -19,19 +19,20 @@
 		<el-table :data="funds" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 100%;">
 			<el-table-column type="selection" width="55">
 			</el-table-column>
-			<el-table-column prop="fundNo" label="基金号" width="110" sortable>
+			<el-table-column prop="fundNo" label="id" width="70" sortable>
 			</el-table-column>
-			<el-table-column prop="fundName" label="基金名" width="180" sortable>
+			<el-table-column prop="fundName" label="基金名" width="130" sortable>
 			</el-table-column>
-			<el-table-column prop="fundPrice" label="买入价(元/份)" width="160" sortable>
+			<el-table-column prop="fundPrice" label="剩余金额(元)" width="140" sortable>
 			</el-table-column>
-			<el-table-column prop="fundStatus" label="基金状态" width="140" sortable>
+      <el-table-column prop="rate" label="利率" width="120" sortable :formatter="formatRate"/>
+			<el-table-column prop="fundStatus" label="基金状态" width="130" sortable>
 			</el-table-column>
 			<el-table-column prop="fundCreateDate" label="成立时间" width="150" sortable>
 			</el-table-column>
 			<el-table-column label="操作" width="150">
 				<template scope="scope">
-					<el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+					<el-button type="primary" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
 				</template>
 			</el-table-column>
@@ -57,8 +58,8 @@
 						<el-radio class="radio" label="未上市">未上市</el-radio>
 					</el-radio-group>
 				</el-form-item>
-				<el-form-item label="价格">
-					<el-input-number v-model="editForm.price" :min="0" :max="200"></el-input-number>
+				<el-form-item label="发行金额">
+					<el-input-number v-model="editForm.price" :min="1000000" :max="500000000" :step="100000"></el-input-number>
 				</el-form-item>
 				<el-form-item label="成立时间">
 					<el-date-picker type="date" placeholder="选择日期" v-model="editForm.date" disabled></el-date-picker>
@@ -85,8 +86,8 @@
 						<el-radio class="radio" :label="0">未上市</el-radio>
 					</el-radio-group>
 				</el-form-item> -->
-				<el-form-item label="价格">
-					<el-input-number v-model="addForm.price" :min="0" :max="200"></el-input-number>
+				<el-form-item label="发行金额">
+					<el-input-number v-model="addForm.price" :min="1000000" :max="500000000" :step="100000"></el-input-number>
 				</el-form-item>
 				<el-form-item label="日期">
 					<el-date-picker type="date" placeholder="选择日期" v-model="addForm.date"></el-date-picker>
@@ -170,11 +171,15 @@ export default {
     formatSex: function(row, column) {
       return row.sex == 1 ? '男' : row.sex == 0 ? '女' : '未知';
     },
+    formatRate: function(row, column) {
+      let rate = (row.rate * 100).toFixed(4)
+      return rate + '%'
+    },
     handleCurrentChange(val) {
       this.page = val;
       this.getFunds();
     },
-    //获取用户列表
+    // 获取基金列表
     async getFunds() {
       this.listLoading = false
       const token = storage.getSession('token')

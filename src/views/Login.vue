@@ -34,23 +34,18 @@ export default {
             message: '请输入账号',
             trigger: 'blur'
           },
-          //{ validator: validaePass }
         ],
         checkPass: [{
             required: true,
             message: '请输入密码',
             trigger: 'blur'
           },
-          //{ validator: validaePass2 }
         ]
       },
       checked: true
     };
   },
   methods: {
-    handleReset2() {
-      this.$refs.ruleForm2.resetFields();
-    },
     async handleSubmit2(ev) {
       const res = await doLogin(this.ruleForm2.account, this.ruleForm2.checkPass)
       console.log(res)
