@@ -64,7 +64,6 @@ export default {
       this.loading = true
       const token = storage.getSession('token')
       const res = await getUserList(token)
-      console.log(res.data.clientList)
       if (res.resultcode === 0) {
         this.loading = false
         this.users = res.data.clientList

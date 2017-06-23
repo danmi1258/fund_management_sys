@@ -4,16 +4,17 @@ import Home from './views/Home.vue'
 import Main from './views/Main.vue'
 import Table from './views/nav1/Table.vue'
 import Form from './views/nav1/Form.vue'
-import user from './views/nav1/user.vue'
+import user from './views/user.vue'
 import Page4 from './views/nav2/Page4.vue'
 import Page5 from './views/nav2/Page5.vue'
 import Page6 from './views/nav3/Page6.vue'
 import echarts from './views/charts/echarts.vue'
+import feature from './views/feature'
 
 let routes = [{
     path: '/login',
     component: Login,
-    name: '',
+    name: 'login',
     hidden: true
   }, {
     path: '/404',
@@ -37,14 +38,10 @@ let routes = [{
       component: Table,
       name: '基金列表'
     }, {
-      path: '/form',
-      component: Form,
-      name: '基金列表'
-    }, {
       path: '/user',
       component: user,
-      name: '列表'
-    }, ]
+      name: '基金类型管理'
+    } ]
   }, {
   //   path: '/',
   //   component: Home,
@@ -66,8 +63,8 @@ let routes = [{
     iconCls: 'fa fa-address-card',
     leaf: true, //只有一个节点
     children: [{
-      path: '/page6',
-      component: Page6,
+      path: '/user',
+      component: user,
       name: '客户管理'
     }]
   }, {
@@ -86,6 +83,17 @@ let routes = [{
     redirect: {
       path: '/404'
     }
+  }, {
+    path: '/',
+    component: Home,
+    name: '',
+    iconCls: 'fa fa-database',
+    leaf: true,
+    children: [{
+      path: '/advertisment',
+      component: feature,
+      name: '广告管理'
+    }]
   }
 ];
 

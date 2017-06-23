@@ -125,14 +125,6 @@ import storage from '@/utils/storage'
             message: '已取消退出'
           })
         }
-    //     .then(() => {
-				// 	sessionStorage.removeItem('user');
-				// 	_this.$router.push('/login');
-				// }).catch(() => {
-
-				// });
-
-
 			},
 			//折叠导航栏
 			collapse:function(){

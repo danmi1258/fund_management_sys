@@ -17,20 +17,23 @@
 
 		<!--列表-->
 		<el-table :data="funds" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 100%;">
+
 			<el-table-column type="selection" width="55">
 			</el-table-column>
 			<el-table-column prop="fundNo" label="id" width="70" sortable>
 			</el-table-column>
-			<el-table-column prop="fundName" label="基金名" width="130" sortable>
+			<el-table-column prop="fundName" label="基金名" width="100" sortable>
 			</el-table-column>
-			<el-table-column prop="fundPrice" label="剩余金额(元)" width="140" sortable>
+			<el-table-column prop="fundPrice" label="剩余金额" width="150" sortable>
 			</el-table-column>
-      <el-table-column prop="rate" label="利率" width="120" sortable :formatter="formatRate"/>
-			<el-table-column prop="fundStatus" label="基金状态" width="130" sortable>
+      <el-table-column prop="rate" label="利率" width="100" sortable :formatter="formatRate"/>
+      <el-table-column prop="fundType.fundTypeName" label="类型" width="100" sortable/>
+			<el-table-column prop="fundStatus" label="状态" width="90" sortable>
 			</el-table-column>
-			<el-table-column prop="fundCreateDate" label="成立时间" width="150" sortable>
+			<el-table-column prop="fundCreateDate" label="成立时间" width="120" sortable>
 			</el-table-column>
-			<el-table-column label="操作" width="150">
+
+			<el-table-column label="操作">
 				<template scope="scope">
 					<el-button type="primary" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
@@ -45,7 +48,8 @@
         layout="prev, pager, next"
         @current-change="handleCurrentChange"
         :current-page="page"
-        :page-count="total"
+        :total="total"
+        :page-size="pageSize"
         style="float:right;">
 			</el-pagination>
 		</el-col>
@@ -56,6 +60,16 @@
 				<el-form-item label="基金名称" prop="name">
 					<el-input v-model="editForm.name" auto-complete="off"></el-input>
 				</el-form-item>
+        <el-form-item label="基金类型">
+          <el-select v-model="typeId" placeholder="请选择">
+            <el-option
+              v-for="item in fundTypes"
+              :key="item.fundTypeId"
+              :label="item.fundTypeName"
+              :value="item.fundTypeId">
+            </el-option>
+          </el-select>
+        </el-form-item>
 				<el-form-item label="基金状态">
           <!-- <el-radio class="radio" v-model="editForm.status" label="已上市">已上市</el-radio> -->
 					<el-radio-group v-model="editForm.status">
@@ -82,11 +96,11 @@
 		<!--新增界面-->
 		<el-dialog title="添加基金" v-model="addFormVisible" :close-on-click-modal="false">
 			<el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-				<el-form-item label="基金名" prop="name">
+				<el-form-item label="基金名">
 					<el-input v-model="addForm.name" auto-complete="off"></el-input>
 				</el-form-item>
-        <el-form-item label="基金类型" prop="name">
-          <el-select v-model="typeValue" placeholder="请选择">
+        <el-form-item label="基金类型">
+          <el-select v-model="typeId" placeholder="请选择">
             <el-option
               v-for="item in fundTypes"
               :key="item.fundTypeId"
@@ -161,8 +175,7 @@ export default {
         status: -1,
         price: 0,
         date: '',
-        desc: '',
-        typeValue: ''
+        desc: ''
       },
       addFormVisible: false, //新增界面是否显示
       addLoading: false,
@@ -179,10 +192,10 @@ export default {
         status: -1,
         price: 0,
         date: '',
-        desc: '',
-        typeValue: ''
+        desc: ''
       },
-      typeValue: 1
+      pageSize: 3,
+      typeId: 1
     }
   },
   methods: {
@@ -236,6 +249,7 @@ export default {
     },
     //显示编辑界面
     handleEdit: function(index, row) {
+      console.log(row)
       this.editFormVisible = true
       const {
         fundNo,
@@ -243,12 +257,14 @@ export default {
         fundPrice,
         fundStatus,
         fundDescribe,
-        fundCreateDate
+        fundCreateDate,
+        fundType
       } = row
       this.editForm.id = fundNo
       this.editForm.name = fundName
       this.editForm.status = fundStatus
-      console.log(this.editForm.status)
+      this.typeId = fundType.fundTypeId
+      console.log('type:' + this.typeId)
       this.editForm.price = fundPrice
       this.editForm.desc = fundDescribe
       this.editForm.date = fundCreateDate
@@ -342,6 +358,7 @@ export default {
   mounted() {
     this.getFunds()
     this.getFundTypes()
+    console.log(this.addForm)
   }
 }
 </script>

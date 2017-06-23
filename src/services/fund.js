@@ -51,7 +51,7 @@ const batchRemove = async (fundNos, token) => {
   })
 }
 
-const update = async ({ id, name, price, status, desc }, token) => {
+const update = async ({ id, name, price, status, desc }, typeId, token) => {
   console.log(typeof id)
   return await axios.get(`${API}/admin/adminUpdateFund.action`, {
     params: {
@@ -60,6 +60,7 @@ const update = async ({ id, name, price, status, desc }, token) => {
       'fund.FundPrice': price,
       'fund.FundStatus': status,
       'fund.FundDescribe': desc,
+      'fund.fundType.fundTypeId': typeId,
       token
     }
   })
