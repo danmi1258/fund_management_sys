@@ -41,7 +41,12 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
 			<el-button type="danger" @click="batchRemove" :disabled="this.sels.length===0">批量删除</el-button>
-			<el-pagination layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="20" :total="total" style="float:right;">
+			<el-pagination
+        layout="prev, pager, next"
+        @current-change="handleCurrentChange"
+        :current-page="page"
+        :page-count="total"
+        style="float:right;">
 			</el-pagination>
 		</el-col>
 
@@ -80,6 +85,16 @@
 				<el-form-item label="基金名" prop="name">
 					<el-input v-model="addForm.name" auto-complete="off"></el-input>
 				</el-form-item>
+        <el-form-item label="基金类型" prop="name">
+          <el-select v-model="typeValue" placeholder="请选择">
+            <el-option
+              v-for="item in fundTypes"
+              :key="item.fundTypeId"
+              :label="item.fundTypeName"
+              :value="item.fundTypeId">
+            </el-option>
+          </el-select>
+        </el-form-item>
 <!-- 				<el-form-item label="基金状态">
 					<el-radio-group v-model="addForm.sex">
 						<el-radio class="radio" :label="1">上市</el-radio>
@@ -113,7 +128,8 @@ import {
   get as getFund,
   remove as removeFund,
   update as updateFund,
-  batchRemove as batchRemoveFund
+  batchRemove as batchRemoveFund,
+  getTypes
 } from '@/services/fund'
 
 export default {
@@ -122,12 +138,13 @@ export default {
       filters: {
         name: ''
       },
+      fundTypes: [],
       funds: [],
       total: 0,
+      pageSize: 1,
       page: 1,
       listLoading: false,
       sels: [], //列表选中列
-
       editFormVisible: false, //编辑界面是否显示
       editLoading: false,
       editFormRules: {
@@ -144,7 +161,8 @@ export default {
         status: -1,
         price: 0,
         date: '',
-        desc: ''
+        desc: '',
+        typeValue: ''
       },
       addFormVisible: false, //新增界面是否显示
       addLoading: false,
@@ -161,9 +179,10 @@ export default {
         status: -1,
         price: 0,
         date: '',
-        desc: ''
-      }
-
+        desc: '',
+        typeValue: ''
+      },
+      typeValue: 1
     }
   },
   methods: {
@@ -177,14 +196,22 @@ export default {
     },
     handleCurrentChange(val) {
       this.page = val;
-      this.getFunds();
+      this.getFunds(this.page);
     },
     // 获取基金列表
     async getFunds() {
       this.listLoading = false
-      const token = storage.getSession('token')
-      const res = await getFund(token)
+      const res = await getFund(this.page)
       this.funds = res.data.FundList
+      this.total = res.data.fundTotleNum
+      console.log(this.total)
+    },
+    // 获取基金类型
+    async getFundTypes() {
+      const token = storage.getSession('token')
+      const res = await getTypes(token)
+      this.fundTypes = res.data.fundTypes
+      console.log(this.fundTypes)
     },
     //删除
     handleDel: function(index, row) {
@@ -263,7 +290,7 @@ export default {
       try {
         await this.$confirm('确认添加基金吗？', '提示', {})
         this.addLoading = true
-        const res = await addFund(this.addForm, token)
+        const res = await addFund(this.addForm, this.typeValue, token)
         this.addLoading = false
         console.log(res)
         if (res.resultcode === 0) {
@@ -314,6 +341,7 @@ export default {
   },
   mounted() {
     this.getFunds()
+    this.getFundTypes()
   }
 }
 </script>
