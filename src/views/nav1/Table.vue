@@ -24,9 +24,8 @@
 			</el-table-column>
 			<el-table-column prop="fundName" label="基金名" width="100" sortable>
 			</el-table-column>
-			<el-table-column prop="fundPrice" label="剩余金额" width="150" sortable>
-			</el-table-column>
-      <el-table-column prop="rate" label="利率" width="100" sortable :formatter="formatRate"/>
+      <el-table-column prop="rate" label="年转化率" width="130" sortable :formatter="formatRate"/>
+      <el-table-column prop="earnings" label="万份收益" width="120" sortable/>
       <el-table-column prop="fundType.fundTypeName" label="类型" width="100" sortable/>
 			<el-table-column prop="fundStatus" label="状态" width="90" sortable>
 			</el-table-column>
@@ -77,9 +76,6 @@
 						<el-radio class="radio" label="未上市">未上市</el-radio>
 					</el-radio-group>
 				</el-form-item>
-				<el-form-item label="发行金额">
-					<el-input-number v-model="editForm.price" :min="1000000" :max="500000000" :step="100000"></el-input-number>
-				</el-form-item>
 				<el-form-item label="成立时间">
 					<el-date-picker type="date" placeholder="选择日期" v-model="editForm.date" disabled></el-date-picker>
 				</el-form-item>
@@ -115,9 +111,6 @@
 						<el-radio class="radio" :label="0">未上市</el-radio>
 					</el-radio-group>
 				</el-form-item> -->
-				<el-form-item label="发行金额">
-					<el-input-number v-model="addForm.price" :min="1000000" :max="500000000" :step="100000"></el-input-number>
-				</el-form-item>
 				<el-form-item label="日期">
 					<el-date-picker type="date" placeholder="选择日期" v-model="addForm.date"></el-date-picker>
 				</el-form-item>
@@ -173,9 +166,9 @@ export default {
         id: 0,
         name: '',
         status: -1,
-        price: 0,
         date: '',
-        desc: ''
+        desc: '',
+        earnings: 0
       },
       addFormVisible: false, //新增界面是否显示
       addLoading: false,
@@ -190,11 +183,11 @@ export default {
       addForm: {
         name: '',
         status: -1,
-        price: 0,
         date: '',
-        desc: ''
+        desc: '',
+        earnings: 0
       },
-      pageSize: 3,
+      pageSize: 10,
       typeId: 1
     }
   },
@@ -216,15 +209,19 @@ export default {
       this.listLoading = false
       const res = await getFund(this.page)
       this.funds = res.data.FundList
+      if (this.funds) {
+        this.funds.map((item) => {
+          item.earnings = ((item.rate * 10000) / 365).toFixed(4)
+        })
+      }
       this.total = res.data.fundTotleNum
-      console.log(this.total)
     },
     // 获取基金类型
     async getFundTypes() {
       const token = storage.getSession('token')
       const res = await getTypes(token)
+      console.log(res)
       this.fundTypes = res.data.fundTypes
-      console.log(this.fundTypes)
     },
     //删除
     handleDel: function(index, row) {
@@ -254,7 +251,6 @@ export default {
       const {
         fundNo,
         fundName,
-        fundPrice,
         fundStatus,
         fundDescribe,
         fundCreateDate,
@@ -264,8 +260,6 @@ export default {
       this.editForm.name = fundName
       this.editForm.status = fundStatus
       this.typeId = fundType.fundTypeId
-      console.log('type:' + this.typeId)
-      this.editForm.price = fundPrice
       this.editForm.desc = fundDescribe
       this.editForm.date = fundCreateDate
     },
@@ -274,18 +268,18 @@ export default {
       this.addFormVisible = true
       this.addForm = {
         name: '',
-        price: 0,
         date: '',
         desc: ''
-      };
+      }
+      this.typeId = 1
     },
     //编辑
     editSubmit: function() {
       const token = storage.getSession('token')
       this.$confirm('确认提交吗？', '提示', {}).then(async () => {
         this.editLoading = true;
-        const res = await updateFund(this.editForm, token)
-        console.log(res)
+        console.log('here: typeId: ' + this.typeId)
+        const res = await updateFund(this.editForm, this.typeId, token)
         if (res.resultcode === 0) {
           this.editLoading = false
           this.editFormVisible = false
@@ -306,9 +300,8 @@ export default {
       try {
         await this.$confirm('确认添加基金吗？', '提示', {})
         this.addLoading = true
-        const res = await addFund(this.addForm, this.typeValue, token)
+        const res = await addFund(this.addForm, this.typeId, token)
         this.addLoading = false
-        console.log(res)
         if (res.resultcode === 0) {
           this.$message('添加基金成功！')
           this.addFormVisible = false
@@ -334,7 +327,6 @@ export default {
     batchRemove: function() {
       const token = storage.getSession('token')
       var ids = this.sels.map(item => item.fundNo).toString()
-      console.log(ids)
       this.$confirm('确认删除选中记录吗？', '提示', {
         type: 'warning'
       }).then(async () => {
@@ -358,7 +350,6 @@ export default {
   mounted() {
     this.getFunds()
     this.getFundTypes()
-    console.log(this.addForm)
   }
 }
 </script>

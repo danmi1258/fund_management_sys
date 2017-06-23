@@ -63,17 +63,11 @@ router.beforeEach((to, from, next) =>{
 //   return Promise.reject(error)
 // })
 
-axios.interceptors.response.use(function (response) {
-  return response.data
-}, function(error) {
-  return Promise.reject(error)
-})
-
 //router.afterEach(transition => {
 //NProgress.done();
 //});
 
-new Vue({
+var v = new Vue({
   //el: '#app',
   //template: '<App/>',
   router,
@@ -82,3 +76,17 @@ new Vue({
   render: h => h(App)
 }).$mount('#app')
 
+
+
+axios.interceptors.response.use(function (response) {
+  if (response.data.resultcode === -2) {
+    v.$message({
+      message: '您的登录已过期，请重新登录',
+      type: 'error'
+    })
+    v.$router.push({ name: 'login' })
+  } else
+    return response.data
+}, function(error) {
+  return Promise.reject(error)
+})

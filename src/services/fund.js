@@ -1,14 +1,13 @@
 import { API } from '@/config'
 import axios from 'axios'
 
-const add = async ({ name, price, desc, date }, typeId, token) => {
+const add = async ({ name, desc, date }, typeId, token) => {
   console.log(typeId)
   console.log(token)
   token = token.replace(/\"/g, "")
   const res = await axios.get(`${API}/admin/adminFundAdd.action`, {
     params: {
       'fund.FundName': name,
-      'fund.FundPrice': price,
       'fund.fundType.fundTypeId': typeId,
       'fund.FundDescribe': desc,
       'fund.date': date,
@@ -51,13 +50,13 @@ const batchRemove = async (fundNos, token) => {
   })
 }
 
-const update = async ({ id, name, price, status, desc }, typeId, token) => {
+const update = async ({ id, name, status, desc }, typeId, token) => {
+  console.log('token: ' + token)
   console.log(typeof id)
   return await axios.get(`${API}/admin/adminUpdateFund.action`, {
     params: {
       'fund.FundNo': id,
       'fund.FundName': name,
-      'fund.FundPrice': price,
       'fund.FundStatus': status,
       'fund.FundDescribe': desc,
       'fund.fundType.fundTypeId': typeId,
