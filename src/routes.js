@@ -5,6 +5,7 @@ import Main from './views/Main.vue'
 import Table from './views/nav1/Table.vue'
 import Form from './views/nav1/Form.vue'
 import user from './views/user.vue'
+import types from '@/views/nav1/type'
 import Page4 from './views/nav2/Page4.vue'
 import Page5 from './views/nav2/Page5.vue'
 import Page6 from './views/nav3/Page6.vue'
@@ -38,8 +39,8 @@ let routes = [{
       component: Table,
       name: '基金列表'
     }, {
-      path: '/user',
-      component: user,
+      path: '/fundTypes',
+      component: types,
       name: '基金类型管理'
     } ]
   }, {

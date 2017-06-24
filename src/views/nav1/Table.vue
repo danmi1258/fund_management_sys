@@ -135,9 +135,9 @@ import {
   get as getFund,
   remove as removeFund,
   update as updateFund,
-  batchRemove as batchRemoveFund,
-  getTypes
+  batchRemove as batchRemoveFund
 } from '@/services/fund'
+import { get as getTypes } from '@/services/fundTypes'
 
 export default {
   data() {
