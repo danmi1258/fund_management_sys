@@ -65,24 +65,12 @@ const update = async ({ id, name, status, desc }, typeId, token) => {
   })
 }
 
-/**
- * [获取基金类型信息]
- * @param  {[type]} token [description]
- * @return {[type]}       [description]
- */
-const getTypes = async (token) => {
-  return await axios.get(`${API}/admin/adminGetFundType.action`, {
-    params: {
-      token
-    }
-  })
-}
+
 
 export {
   add,
   get,
   remove,
   update,
-  batchRemove,
-  getTypes
+  batchRemove
 }
