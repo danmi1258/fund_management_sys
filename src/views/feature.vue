@@ -2,111 +2,162 @@
   <section>
     <!--工具条-->
     <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-      <el-form :inline="true" :model="filters">
-        <el-form-item>
-          <el-button type="primary" @click.native.prevent="openAddForm">添加广告</el-button>
-        </el-form-item>
-      </el-form>
+      <el-button type="primary" @click.native.prevent="openAddForm">添加广告</el-button>
     </el-col>
 
     <!--列表-->
     <template>
-      <el-table :data="users" highlight-current-row v-loading="loading" style="width: 100%;">
-        <el-table-column prop="clientId" label="账号" sortable />
-        <el-table-column prop="clientName" label="姓名" width="120" sortable>
-        </el-table-column>
-        <el-table-column prop="sex" label="性别" width="100" sortable>
-        </el-table-column>
-        <el-table-column prop="balance" label="余额 （元）" width="130" :formatter="formatBalance" sortable>
-        </el-table-column>
-        <el-table-column prop="email" label="邮箱号" width="130" sortable>
-        </el-table-column>
-        <el-table-column prop="phone" label="手机号" min-width="180" sortable>
+      <el-table :data="features" highlight-current-row v-loading="loading" style="width: 100%;">
+        <el-table-column prop="title" label="主题"     width="100" sortable />
+        <el-table-column prop="info1" label="广告项目1" width="230" sortable />
+        <el-table-column prop="info2" label="广告项目2" width="230" sortable />
+        <el-table-column prop="info3" label="广告项目3" width="230" sortable />
+        <el-table-column
+          label="操作"
+          align="center"
+        >
+          <template scope="scope">
+            <el-button @click="updateFeature" type="primary" size="small">修改</el-button>
+            <el-button @click="deleteFeature" type="danger" size="small">删除</el-button>
+          </template>
         </el-table-column>
       </el-table>
     </template>
 
     <!--新增界面-->
     <el-dialog title="添加广告" v-model="addFormVisible" :close-on-click-modal="false">
-  <!--     <el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-        <el-form-item label="基金名">
-          <el-input v-model="addForm.name" auto-complete="off"></el-input>
+
+      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="活动名称" prop="title">
+          <el-input v-model="ruleForm.title"></el-input>
         </el-form-item>
-        <el-form-item label="基金类型">
-          <el-select v-model="typeId" placeholder="请选择">
-            <el-option
-              v-for="item in fundTypes"
-              :key="item.fundTypeId"
-              :label="item.fundTypeName"
-              :value="item.fundTypeId">
-            </el-option>
-          </el-select>
+        <el-form-item label="项目1" prop="info1">
+          <el-input v-model="ruleForm.info1"></el-input>
         </el-form-item>
-       <el-form-item label="基金状态">
-          <el-radio-group v-model="addForm.sex">
-            <el-radio class="radio" :label="1">上市</el-radio>
-            <el-radio class="radio" :label="0">未上市</el-radio>
-          </el-radio-group>
+        <el-form-item label="项目2" prop="info2">
+          <el-input v-model="ruleForm.info2"></el-input>
         </el-form-item>
-        <el-form-item label="发行金额">
-          <el-input-number v-model="addForm.price" :min="1000000" :max="500000000" :step="100000"></el-input-number>
+        <el-form-item label="项目3" prop="info3">
+          <el-input v-model="ruleForm.info3"></el-input>
         </el-form-item>
-        <el-form-item label="日期">
-          <el-date-picker type="date" placeholder="选择日期" v-model="addForm.date"></el-date-picker>
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input type="textarea" v-model="addForm.desc"></el-input>
+        <el-form-item>
+          <el-button type="primary" @click.native.prevent="submitForm('ruleForm')">确认添加</el-button>
+          <el-button @click="resetForm('ruleForm')">重置</el-button>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click.native="addFormVisible = false">取消</el-button>
-        <el-button type="primary" @click.native="addSubmit" :loading="addLoading">提交</el-button>
-      </div> -->
     </el-dialog>
 
   </section>
 </template>
 <script type="text/ecmascript-6">
-import { get as getUserList } from '@/services/users'
+import { get as getFeatureList, add as addFeature } from '@/services/feature'
 import storage from '@/utils/storage'
 export default {
   data() {
+    var validateTitle = function (rule, value, callback) {
+      if (value.length !== 2) {
+        callback(new Error('广告标题必须是2个字符！'))
+      } else {
+        callback()
+      }
+    }
+    var validateInfo = function (rule, value, callback) {
+      if (value.length < 1 || value.length > 16) {
+        callback(new Error('广告项目必须在16个字符以内'))
+      } else {
+        callback()
+      }
+    }
     return {
       loading: false,
+      addLoading: false,
       advs: [
       ],
-      users: [],
+      features: [],
       addFormVisible: false,
-      addFormRules: {
-        name: [{
-          required: true,
-          message: '请输入基金名',
-          trigger: 'blur'
-        }]
+      rules: {
+        title: [
+          { required: true, message: '请输入活动名称', trigger: 'blur' },
+          { validator: validateTitle }
+        ],
+        info1: [
+          { required: true, message: '请输入广告项目1', trigger: 'blur' },
+          { validator: validateInfo }
+        ],
+        info2: [
+          { required: true, message: '请输入广告项目2', trigger: 'blur' },
+          { validator: validateInfo }
+        ],
+        info3: [
+          { required: true, message: '请输入广告项目3', trigger: 'blur' },
+          { validator: validateInfo }
+        ]
       },
       //新增界面数据
-      addForm: {
-        name: '',
-        status: -1,
-        price: 0,
-        date: '',
-        desc: ''
+      ruleForm: {
+        title: '',
+        info1: '',
+        info2: '',
+        info3: ''
       }
     }
   },
   methods: {
+    updateFeature() {
+
+    },
+    deleteFeature() {
+
+    },
     openAddForm() {
       this.addFormVisible = true
     },
     //获取用户列表
     async getAdvs () {
-      // this.loading = true
-      // const token = storage.getSession('token')
-      // const res = await getUserList(token)
-      // if (res.resultcode === 0) {
-      //   this.loading = false
-      //   this.users = res.data.clientList
-      // }
+      this.loading = true
+      const res = await getFeatureList()
+      this.loading = false
+      console.log(res)
+      if (res.resultcode === 0) {
+        res.data.feature_list.map((item, index) => {
+          let featureObj = {}
+          featureObj.title = item.title
+          item.info.map((value, id) => {
+            id++
+            featureObj['info' + id] = value
+          })
+          this.features.push(featureObj)
+        })
+        console.log(this.features)
+      }
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          this.addLoading = true
+          const token = storage.getSession('token')
+          const res = await addFeature(this.ruleForm, token)
+          this.addLoading = false
+          if (res.resultcode === 0) {
+            this.$message({
+              message: '广告添加成功',
+              type: 'success'
+            })
+            this.addFormVisible = false
+          } else {
+            this.$message({
+              message: res.message,
+              type: 'error'
+            })
+          }
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      });
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
     }
   },
   mounted() {

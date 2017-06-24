@@ -67,12 +67,6 @@ export default {
       if (res.resultcode === 0) {
         this.loading = false
         this.users = res.data.clientList
-      } else if (res.resultcode === -2) {
-        this.$message({
-          message: '您的登录已过期，请重新登录',
-          type: 'error'
-        })
-        this.$router.push({ name: 'login' })
       }
     },
     formatBalance(row, column) {

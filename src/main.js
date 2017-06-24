@@ -41,31 +41,11 @@ router.beforeEach((to, from, next) =>{
   }
 })
 
-// router.beforeEach((to, from, next) => {
-//   //NProgress.start();
-//   if (to.path == '/login') {
-//     sessionStorage.removeItem('user');
-//   }
-//   let user = JSON.parse(sessionStorage.getItem('user'));
-//   if (!user && to.path != '/login') {
-//     next({ path: '/login' })
-//   } else {
-//     next()
-//   }
-// })
-
-// axios.interceptors.request.use(function (config) {
-//   console.log(config)
-//   config.headers.token = 'xjojaf'
-//   return config
-// }, function (error) {
-//   // Do something with request error
-//   return Promise.reject(error)
-// })
-
-//router.afterEach(transition => {
-//NProgress.done();
-//});
+axios.interceptors.response.use(function (response) {
+  return response.data
+}, function(error) {
+  return Promise.reject(error)
+})
 
 var v = new Vue({
   //el: '#app',
@@ -79,14 +59,15 @@ var v = new Vue({
 
 
 axios.interceptors.response.use(function (response) {
-  if (response.data.resultcode === -2) {
+  if (response.resultcode === -2) {
     v.$message({
       message: '您的登录已过期，请重新登录',
       type: 'error'
     })
     v.$router.push({ name: 'login' })
-  } else
-    return response.data
+  } else {
+    return response
+  }
 }, function(error) {
   return Promise.reject(error)
 })
