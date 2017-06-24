@@ -17,8 +17,8 @@
           align="center"
         >
           <template scope="scope">
-            <el-button @click="updateFeature" type="primary" size="small">修改</el-button>
-            <el-button @click="deleteFeature" type="danger" size="small">删除</el-button>
+            <el-button @click="updateFeature(scope.row)" type="primary" size="small">修改</el-button>
+            <el-button @click="deleteFeature(scope.row)" type="danger" size="small">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -47,10 +47,35 @@
       </el-form>
     </el-dialog>
 
+<!--编辑界面-->
+    <el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false">
+      <el-form :model="editForm" :rules="rules" ref="editForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="活动名称" prop="title">
+          <el-input v-model="editForm.title"></el-input>
+        </el-form-item>
+        <el-form-item label="项目1" prop="info1">
+          <el-input v-model="editForm.info1"></el-input>
+        </el-form-item>
+        <el-form-item label="项目2" prop="info2">
+          <el-input v-model="editForm.info2"></el-input>
+        </el-form-item>
+        <el-form-item label="项目3" prop="info3">
+          <el-input v-model="editForm.info3"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click.native.prevent="editFeature('editForm')">确认修改</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </section>
 </template>
 <script type="text/ecmascript-6">
-import { get as getFeatureList, add as addFeature } from '@/services/feature'
+import {
+  get as getFeatureList,
+  add as addFeature,
+  update as updateFeature,
+  remove as removeFeature
+} from '@/services/feature'
 import storage from '@/utils/storage'
 export default {
   data() {
@@ -71,10 +96,12 @@ export default {
     return {
       loading: false,
       addLoading: false,
+      editLoading: false,
       advs: [
       ],
       features: [],
       addFormVisible: false,
+      editFormVisible: false,
       rules: {
         title: [
           { required: true, message: '请输入活动名称', trigger: 'blur' },
@@ -99,25 +126,74 @@ export default {
         info1: '',
         info2: '',
         info3: ''
+      },
+      editForm: {
+        id: '',
+        title: '',
+        info1: '',
+        info2: '',
+        info3: ''
       }
     }
   },
   methods: {
-    updateFeature() {
-
+    updateFeature(row) {
+      this.editFormVisible = true
+      const {
+        title,
+        info1,
+        info2,
+        info3,
+        id
+      } = row
+      this.editForm.id = id
+      this.editForm.title = title
+      this.editForm.info1 = info1
+      this.editForm.info2 = info2
+      this.editForm.info3 = info3
     },
-    deleteFeature() {
-
+    deleteFeature(row) {
+      const token = storage.getSession('token')
+      this.$confirm('将删除此条广告, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await removeFeature(row.id, token)
+        console.log(res)
+        if (res.resultcode === 0) {
+          this.$message({
+            message: '广告删除成功',
+            type: 'success'
+          })
+          this.addFormVisible = false
+        } else {
+          this.$message({
+            message: res.message,
+            type: 'error'
+          })
+        }
+        this.getAdvs()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     },
     openAddForm() {
       this.addFormVisible = true
+      this.ruleForm.title = ''
+      this.ruleForm.info1 = ''
+      this.ruleForm.info2 = ''
+      this.ruleForm.info3 = ''
     },
-    //获取用户列表
+    //获取广告列表
     async getAdvs () {
       this.loading = true
       const res = await getFeatureList()
       this.loading = false
-      console.log(res)
+      this.features = []
       if (res.resultcode === 0) {
         res.data.feature_list.map((item, index) => {
           let featureObj = {}
@@ -126,10 +202,49 @@ export default {
             id++
             featureObj['info' + id] = value
           })
+          featureObj.id = item.id
           this.features.push(featureObj)
         })
-        console.log(this.features)
       }
+    },
+    // 修改广告信息 按钮
+    editFeature(formName) {
+      const token = storage.getSession('token')
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          this.$confirm('是否确认修改广告?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(async () => {
+            this.editLoading = true
+            const res = await updateFeature(this.editForm, token)
+            console.log(res)
+            if (res.resultcode === 0) {
+              this.$message({
+                message: '广告修改成功',
+                type: 'success'
+              })
+              // this.editLoading = false
+              this.editFormVisible = false
+              this.getAdvs()
+            } else {
+              this.$message({
+                message: res.message,
+                type: 'error'
+              })
+            }
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      })
     },
     submitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
@@ -144,6 +259,7 @@ export default {
               type: 'success'
             })
             this.addFormVisible = false
+            this.getAdvs()
           } else {
             this.$message({
               message: res.message,
