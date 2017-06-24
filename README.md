@@ -5,6 +5,8 @@
 
 ## Build Setup
 
+## 喜欢的麻烦start一下 - - - -
+
 ``` bash
 # install dependencies
 npm install
