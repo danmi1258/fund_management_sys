@@ -43,14 +43,14 @@
 		<!--工具条-->
 		<el-col :span="24" class="toolbar">
 			<el-button type="danger" @click="batchRemove" :disabled="this.sels.length===0">批量删除</el-button>
-			<el-pagination
+      <el-pagination
         layout="prev, pager, next"
         @current-change="handleCurrentChange"
-        :current-page="page"
-        :total="total"
         :page-size="pageSize"
+        :current-page="currentPage"
+        :total="total"
         style="float:right;">
-			</el-pagination>
+      </el-pagination>
 		</el-col>
 
 		<!--编辑界面-->
@@ -105,12 +105,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-<!-- 				<el-form-item label="基金状态">
-					<el-radio-group v-model="addForm.sex">
-						<el-radio class="radio" :label="1">上市</el-radio>
-						<el-radio class="radio" :label="0">未上市</el-radio>
-					</el-radio-group>
-				</el-form-item> -->
 				<el-form-item label="日期">
 					<el-date-picker type="date" placeholder="选择日期" v-model="addForm.date"></el-date-picker>
 				</el-form-item>
@@ -147,9 +141,9 @@ export default {
       },
       fundTypes: [],
       funds: [],
-      total: 0,
-      pageSize: 1,
-      page: 1,
+      total: 10,
+      pageSize: 3,
+      currentPage: 1,
       listLoading: false,
       sels: [], //列表选中列
       editFormVisible: false, //编辑界面是否显示
@@ -187,7 +181,6 @@ export default {
         desc: '',
         earnings: 0
       },
-      pageSize: 10,
       typeId: 1
     }
   },
@@ -201,13 +194,13 @@ export default {
       return rate + '%'
     },
     handleCurrentChange(val) {
-      this.page = val;
-      this.getFunds(this.page);
+      this.currentPage = val;
+      this.getFunds(this.currentPage);
     },
     // 获取基金列表
-    async getFunds() {
+    async getFunds(currentPage = 1) {
       this.listLoading = false
-      const res = await getFund(this.page)
+      const res = await getFund(currentPage)
       this.funds = res.data.FundList
       if (this.funds) {
         this.funds.map((item) => {
@@ -220,18 +213,18 @@ export default {
     async getFundTypes() {
       const token = storage.getSession('token')
       const res = await getTypes(token)
-      console.log(res)
       this.fundTypes = res.data.fundTypes
     },
     //删除
     handleDel: function(index, row) {
       const fundNo = row.fundNo
+      const adminId = storage.getSession('userNo')
       const token = storage.getSession('token')
       this.$confirm('确认删除该记录吗?', '提示', {
         type: 'warning'
       }).then(async () => {
         this.listLoading = true
-        const res = await removeFund(fundNo, token)
+        const res = await removeFund({adminId, fundNo, token})
         if (res.resultcode === 0) {
           this.listLoading = false
           this.$message({
@@ -239,6 +232,12 @@ export default {
             type: 'success'
           })
           this.getFunds()
+        } else {
+          this.listLoading = false
+          this.$message({
+            message: res.message,
+            type: 'error'
+          })
         }
       }).catch(() => {
 
@@ -246,7 +245,6 @@ export default {
     },
     //显示编辑界面
     handleEdit: function(index, row) {
-      console.log(row)
       this.editFormVisible = true
       const {
         fundNo,
@@ -276,10 +274,11 @@ export default {
     //编辑
     editSubmit: function() {
       const token = storage.getSession('token')
+      const adminId = storage.getSession('userNo')
       this.$confirm('确认提交吗？', '提示', {}).then(async () => {
         this.editLoading = true;
         console.log('here: typeId: ' + this.typeId)
-        const res = await updateFund(this.editForm, this.typeId, token)
+        const res = await updateFund(this.editForm, {adminId, typeId: this.typeId, token})
         if (res.resultcode === 0) {
           this.editLoading = false
           this.editFormVisible = false
@@ -296,11 +295,12 @@ export default {
     //新增
     async addSubmit() {
       const token = storage.getSession('token')
+      const adminId = storage.getSession('userNo')
       console.log(this.addForm)
       try {
         await this.$confirm('确认添加基金吗？', '提示', {})
         this.addLoading = true
-        const res = await addFund(this.addForm, this.typeId, token)
+        const res = await addFund(this.addForm, {adminId, typeId: this.typeId, token})
         this.addLoading = false
         if (res.resultcode === 0) {
           this.$message('添加基金成功！')
@@ -326,18 +326,24 @@ export default {
     //批量删除
     batchRemove: function() {
       const token = storage.getSession('token')
-      var ids = this.sels.map(item => item.fundNo).toString()
+      const adminId = storage.getSession('userNo')
+      var fundNos = this.sels.map(item => item.fundNo).toString()
       this.$confirm('确认删除选中记录吗？', '提示', {
         type: 'warning'
       }).then(async () => {
         this.listLoading = true;
-        const res = await batchRemoveFund(ids, token)
+        const res = await batchRemoveFund({adminId, fundNos, token})
         console.log(res)
         if (res.resultcode === 0) {
           this.listLoading = false
           this.$message({
             message: '刪除成功',
             type: 'success'
+          })
+        } else {
+          this.$message({
+            message: res.message,
+            type: 'error'
           })
         }
         this.getFunds()

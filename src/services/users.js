@@ -1,20 +1,22 @@
 import { API } from '@/config'
 import axios from 'axios'
 
-const get = async (token) => {
+const get = async ({ adminId, token}) => {
   return await axios.get(`${API}/admin/adminGetClientList.action`, {
     params: {
+      adminId,
       token
     }
   })
 }
 
 
-const update = async(clientId, status, token) => {
+const update = async({clientId, active, adminId, token}) => {
   return await axios.get(`${API}/admin/adminFrozenOrThawClient.action`, {
     params: {
+      adminId,
       clientId,
-      active: status,
+      active,
       token
     }
   })

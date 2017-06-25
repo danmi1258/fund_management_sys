@@ -154,12 +154,14 @@ export default {
     },
     deleteFeature(row) {
       const token = storage.getSession('token')
+      const adminId = storage.getSession('userNo')
+      const featureId = row.id
       this.$confirm('将删除此条广告, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
-        const res = await removeFeature(row.id, token)
+        const res = await removeFeature({adminId, featureId, token})
         console.log(res)
         if (res.resultcode === 0) {
           this.$message({
@@ -210,6 +212,7 @@ export default {
     // 修改广告信息 按钮
     editFeature(formName) {
       const token = storage.getSession('token')
+      const adminId = storage.getSession('userNo')
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           this.$confirm('是否确认修改广告?', '提示', {
@@ -218,7 +221,7 @@ export default {
             type: 'warning'
           }).then(async () => {
             this.editLoading = true
-            const res = await updateFeature(this.editForm, token)
+            const res = await updateFeature(this.editForm, {adminId, token})
             console.log(res)
             if (res.resultcode === 0) {
               this.$message({
@@ -249,9 +252,10 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
-          this.addLoading = true
+          const adminId = storage.getSession('userNo')
           const token = storage.getSession('token')
-          const res = await addFeature(this.ruleForm, token)
+          this.addLoading = true
+          const res = await addFeature(this.ruleForm, {adminId, token})
           this.addLoading = false
           if (res.resultcode === 0) {
             this.$message({

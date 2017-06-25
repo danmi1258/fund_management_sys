@@ -12,19 +12,22 @@ const get = async () => {
   return await axios.get(`${API}/admin/adminGetFundType.action`)
 }
 
-const remove = async (typeId, token) => {
+const remove = async ({adminId, typeId, token}) => {
   return await axios.get(`${API}/admin/adminDeleteFundType.action`, {
     params: {
+      adminId,
       fundTypeId: typeId,
       token
     }
   })
 }
 
-const add = async (name, token) => {
+const add = async ({adminId, name, desc, token}) => {
   return await axios.get(`${API}/admin/adminAddFundType`, {
     params: {
+      adminId,
       fundTypeName: name,
+      fundTypeDescribe: desc,
       token
     }
   })

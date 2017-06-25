@@ -20,9 +20,10 @@ const get = async () => {
  * @param  {[type]} token         [description]
  * @return {[type]}               [description]
  */
-const add = async ({ title, info1, info2, info3 }, token) => {
+const add = async ({ title, info1, info2, info3 }, {adminId, token}) => {
   return await axios.get(`${API}/admin/adminAddFeature.action`, {
     params: {
+      adminId,
       'featureTitle': title,
       'featureDescribe': info1,
       'featureInfo': info2,
@@ -38,9 +39,10 @@ const add = async ({ title, info1, info2, info3 }, token) => {
  * @param  {[type]} token     [description]
  * @return {[type]}           [description]
  */
-const remove = async (featureId, token) => {
+const remove = async ({adminId, featureId, token}) => {
   return await axios.get(`${API}/admin/adminDeleteFeature.action`, {
     params: {
+      adminId,
       featureId,
       token
     }
@@ -57,9 +59,10 @@ const remove = async (featureId, token) => {
  * @param  {[type]} token         [description]
  * @return {[type]}               [description]
  */
-const update = async ({ id, title, info1, info2, info3 }, token) => {
+const update = async ({ id, title, info1, info2, info3 }, {adminId, token}) => {
   return await axios.get(`${API}/admin/adminUpdateFeature.action`, {
     params: {
+      adminId,
       featureId: id,
       featureTitle: title,
       featureDescribe: info1,
