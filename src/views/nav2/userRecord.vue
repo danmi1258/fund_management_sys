@@ -3,11 +3,27 @@
     <!--工具条-->
     <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
       <el-form :inline="true" :model="filters">
-        <el-form-item>
-          <el-input v-model="filters.name" placeholder="姓名"></el-input>
+        <el-form-item label="交易号">
+          <el-input v-model="filters.transId" placeholder="交易号"></el-input>
+        </el-form-item>
+        <el-form-item label="交易类型">
+          <el-select v-model="filters.transType" placeholder="请选择">
+            <el-option label="全部" value=""/>
+            <el-option label="申购" value="申购"/>
+            <el-option label="赎回" value="赎回"/>
+            <el-option label="存款" value="存款"/>
+            <el-option label="取款" value="取款"/>
+            <el-option label="转账" value="转账"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="用户账号">
+          <el-input v-model="filters.clientId" placeholder="用户账号"></el-input>
+        </el-form-item>
+        <el-form-item label="对方账号">
+          <el-input v-model="filters.targetId" placeholder="对方账号"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary">查询</el-button>
+          <el-button type="primary" @click="groupSearch">查询</el-button>
         </el-form-item>
       </el-form>
     </el-col>
@@ -57,11 +73,16 @@
 <script type="text/ecmascript-6">
 import { get as getUserRecordList } from '@/services/order'
 import storage from '@/utils/storage'
+
+
 export default {
   data() {
     return {
       filters: {
-        name: ''
+        transId: '',
+        transType: '',
+        clientId: '',
+        targetId: ''
       },
       loading: false,
       userRecords: [
@@ -77,7 +98,15 @@ export default {
       this.loading = true
       const token = storage.getSession('token')
       const adminId = storage.getSession('userNo')
-      const res = await getUserRecordList({ pageNo, token, adminId })
+      const res = await getUserRecordList({
+        pageNo,
+        transId: this.filters.transId,
+        transType: this.filters.transType,
+        clientId: this.filters.clientId,
+        targetId: this.filters.targetId,
+        token,
+        adminId
+      })
       if (res.resultcode === 0) {
         this.loading = false
         this.userRecords = res.data.listHelper
@@ -104,6 +133,9 @@ export default {
         return row.transPrice.toFixed(2) + ' 元'
       else
         return row.transPrice
+    },
+    groupSearch() {
+      this.getuserRecords(this.currentPage)
     }
   },
   watch: {

@@ -18,13 +18,46 @@ const add = async ({ name, desc, date }, { adminId, typeId, token }) => {
   return res
 }
 
-const get = async (pageNumber = 1) => {
+const test = async (pageNumber = 1) => {
   const res = await axios.get(`${API}/admin/adminLoadFund.action`, {
     params: {
       fundPageNo: pageNumber
     }
   })
   return res
+}
+
+/**
+ * [组合查询获取基金列表]
+ * @param  {[type]} params [description]
+ * @return {[type]}        [description]
+ */
+const get = async (params) => {
+  const DEAFULT = {
+    fundId: '',
+    fundName: '',
+    status: '',
+    typeId: '',
+    currentPage: 5
+  }
+  params = Object.assign(DEAFULT, params)
+  console.log(params)
+  const {
+    fundId,
+    fundName,
+    status,
+    typeId,
+    currentPage
+  } = params
+  return await axios.get(`${API}/admin/lookFundByHelper.action`, {
+    params: {
+      qryFundNo: fundId,
+      qryFundName: fundName,
+      qryfundTypeId: typeId,
+      qryFundStatus: status,
+      fundPageNo: currentPage
+    }
+  })
 }
 
 const remove = async ({adminId, fundNo, token }) =>{

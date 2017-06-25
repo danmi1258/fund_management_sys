@@ -3,16 +3,27 @@
     <!--工具条-->
     <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
       <el-form :inline="true" :model="filters">
-        <el-form-item>
-          <el-input v-model="filters.name" placeholder="姓名"></el-input>
+        <el-form-item label="交易号">
+          <el-input v-model="filters.transId" placeholder="交易号"></el-input>
+        </el-form-item>
+        <el-form-item label="交易类型">
+          <el-select v-model="filters.transType" placeholder="请选择">
+            <el-option label="全部" value=""/>
+            <el-option label="申购" value="申购"/>
+            <el-option label="赎回" value="赎回"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="用户账号">
+          <el-input v-model="filters.clientId" placeholder="用户账号"></el-input>
+        </el-form-item>
+        <el-form-item label="基金号">
+          <el-input v-model="filters.fundId" placeholder="基金号"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary">查询</el-button>
+          <el-button type="primary" @click="groupSearch">查询</el-button>
         </el-form-item>
       </el-form>
     </el-col>
-
-    <!--列表-->
     <el-table
       :data="userRecords"
       highlight-current-row
@@ -62,7 +73,10 @@ export default {
   data() {
     return {
       filters: {
-        name: ''
+        transId: '',
+        fundId: '',
+        clientId: '',
+        transType: ''
       },
       loading: false,
       userRecords: [
@@ -74,16 +88,27 @@ export default {
   },
   methods: {
     // 获取用户交易记录
-    async getuserRecords (pageNo = 1) {
+    async getUserRecords (pageNo = 1) {
       this.loading = true
       const token = storage.getSession('token')
       const adminId = storage.getSession('userNo')
-      const res = await getFundRecordList({ pageNo, token, adminId })
+      const res = await getFundRecordList({
+        pageNo,
+        transId: this.filters.transId,
+        transType: this.filters.transType,
+        fundId: this.filters.fundId,
+        clientId: this.filters.clientId,
+        token,
+        adminId
+      })
       if (res.resultcode === 0) {
         this.loading = false
         this.userRecords = res.data.listHelper
         this.total = res.data.total
       }
+    },
+    groupSearch() {
+      this.getUserRecords(this.currentPage)
     },
     tableRowClassName(row, index) {
       if (row.active === false) {
@@ -109,11 +134,11 @@ export default {
   },
   watch: {
     currentPage(val) {
-      this.getuserRecords(val)
+      this.getUserRecords(val)
     }
   },
   mounted() {
-    this.getuserRecords()
+    this.getUserRecords()
   },
   filters: {
     filterStatusButton(val) {

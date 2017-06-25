@@ -1,19 +1,37 @@
 <template>
 	<section>
 		<!--工具条-->
-		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-			<el-form :inline="true" :model="filters">
-				<el-form-item>
-					<el-input v-model="filters.name" placeholder="基金名"></el-input>
-				</el-form-item>
-				<el-form-item>
-					<el-button type="primary" v-on:click="getFunds">查询</el-button>
-				</el-form-item>
-				<el-form-item>
-					<el-button type="primary" @click="handleAdd">基金上市</el-button>
-				</el-form-item>
-			</el-form>
-		</el-col>
+    <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+      <el-form :inline="true" :model="filters">
+        <el-form-item label="基金号">
+          <el-input v-model="filters.fundId" placeholder="基金号"></el-input>
+        </el-form-item>
+        <el-form-item label="基金名称">
+          <el-input v-model="filters.fundName" placeholder="基金名称"></el-input>
+        </el-form-item>
+        <el-form-item label="基金状态">
+          <el-select v-model="filters.status" placeholder="请选择">
+            <el-option label="全部" value=""/>
+            <el-option label="已上市" value="已上市"/>
+            <el-option label="未上市" value="未上市"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="基金类型">
+          <el-select v-model="filters.typeId" placeholder="请选择">
+            <el-option
+              v-for="item in fundTypes"
+              :key="item.fundTypeId"
+              :label="item.fundTypeName"
+              :value="item.fundTypeId">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="groupSearch">查询</el-button>
+          <el-button type="primary" @click="handleAdd">基金上市</el-button>
+        </el-form-item>
+      </el-form>
+    </el-col>
 
 		<!--列表-->
 		<el-table :data="funds" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 100%;">
@@ -133,11 +151,15 @@ import {
 } from '@/services/fund'
 import { get as getTypes } from '@/services/fundTypes'
 
+
 export default {
   data() {
     return {
       filters: {
-        name: ''
+        fundId: '',
+        fundName: '',
+        status: '',
+        typeId: ''
       },
       fundTypes: [],
       funds: [],
@@ -197,17 +219,24 @@ export default {
       this.currentPage = val;
       this.getFunds(this.currentPage);
     },
+
     // 获取基金列表
     async getFunds(currentPage = 1) {
       this.listLoading = false
-      const res = await getFund(currentPage)
-      this.funds = res.data.FundList
+      const res = await getFund({
+        fundId: this.filters.fundId,
+        fundName: this.filters.fundName,
+        status: this.filters.status,
+        typeId: this.filters.typeId,
+        currentPage
+      })
+      this.funds = res.data.listHelper
       if (this.funds) {
         this.funds.map((item) => {
           item.earnings = ((item.rate * 10000) / 365).toFixed(4)
         })
       }
-      this.total = res.data.fundTotleNum
+      this.total = res.data.total
     },
     // 获取基金类型
     async getFundTypes() {
@@ -242,6 +271,9 @@ export default {
       }).catch(() => {
 
       });
+    },
+    groupSearch() {
+      this.getFunds(this.currentPage)
     },
     //显示编辑界面
     handleEdit: function(index, row) {

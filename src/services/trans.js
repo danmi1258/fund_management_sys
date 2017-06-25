@@ -33,14 +33,13 @@ const get = async (params) => {
       adminId,
       transId,
       transType,
-      clientId,
+      clientNo: clientId,
       fundId,
       pageNo,
       token
     }
   })
 }
-
 export {
   get
 }
