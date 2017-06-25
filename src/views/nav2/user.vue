@@ -3,11 +3,28 @@
     <!--工具条-->
     <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
       <el-form :inline="true" :model="filters">
-        <el-form-item>
-          <el-input v-model="filters.name" placeholder="姓名"></el-input>
+        <el-form-item label="用户账号">
+          <el-input v-model="filters.clientId" placeholder="用户账号"></el-input>
+        </el-form-item>
+        <el-form-item label="姓名">
+          <el-input v-model="filters.clientName" placeholder="姓名"></el-input>
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-select v-model="filters.sex" placeholder="请选择">
+            <el-option label="全部" value=""/>
+            <el-option label="男" value="男"/>
+            <el-option label="女" value="女"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="激活状态">
+          <el-select v-model="filters.status" placeholder="请选择">
+            <el-option label="全部" value=""/>
+            <el-option label="正常" value="true"/>
+            <el-option label="冻结" value="false"/>
+          </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary">查询</el-button>
+          <el-button type="primary" @click="groupSearch">查询</el-button>
         </el-form-item>
       </el-form>
     </el-col>
@@ -62,7 +79,10 @@ export default {
   data() {
     return {
       filters: {
-        name: ''
+        clientId: '',
+        clientName: '',
+        sex: '',
+        status: ''
       },
       loading: false,
       users: [
@@ -73,16 +93,28 @@ export default {
     }
   },
   methods: {
+    groupSearch() {
+      this.getUsers(this.currentPage)
+    },
     //获取用户列表
-    async getUsers (pageNo) {
+    async getUsers (pageNo = 1) {
       this.loading = true
       const token = storage.getSession('token')
       const adminId = storage.getSession('userNo')
-      const res = await getUserList({adminId, token})
+      const res = await getUserList({
+        clientId: this.filters.clientId,
+        clientName: this.filters.clientName,
+        sex: this.filters.sex,
+        status: this.filters.status,
+        adminId,
+        token,
+        pageNo
+      })
       if (res.resultcode === 0) {
         this.loading = false
-        this.users = res.data.clientList
+        this.users = res.data.listHelper
       }
+      this.total = res.data.total
     },
     formatBalance(row, column) {
       return row.balance.toFixed(2)
@@ -106,7 +138,7 @@ export default {
             message: '账户冻结成功',
             type: 'success'
           })
-          this.getUsers()
+          this.getUsers(this.currentPage)
         } else if (res.resultcode === -2) {
           this.$message({
             message: '您的登录已过期，请重新登录',
@@ -126,7 +158,7 @@ export default {
             message: '账户激活成功',
             type: 'success'
           })
-          this.getUsers()
+          this.getUsers(this.currentPage)
         } else if (res.resultcode === -2) {
           this.$message({
             message: '您的登录已过期，请重新登录',
@@ -151,7 +183,7 @@ export default {
       this.currentPage = value
     }
   },
-  watchs: {
+  watch: {
     currentPage(val) {
       this.getUsers(val)
     }
