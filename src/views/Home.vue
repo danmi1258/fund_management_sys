@@ -91,7 +91,8 @@ import storage from '@/utils/storage'
 					type: [],
 					resource: '',
 					desc: ''
-				}
+				},
+        superAdmin: false
 			}
 		},
 		methods: {
@@ -136,6 +137,8 @@ import storage from '@/utils/storage'
 		},
 		mounted() {
       this.sysUserName = storage.getSession('userNo')
+      if (this.sysUserName === 'admin')
+        this.superAdmin = true
 		}
 	}
 

@@ -206,4 +206,7 @@ export default {
 .el-table .frozen-row {
   background-color: #F7BA2A;
 }
+.el-table .fund-frozen-row {
+  background-color: #F7BA2A;
+}
 </style>

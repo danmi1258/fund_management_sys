@@ -29,7 +29,6 @@ const get = async (params) => {
     token,
     pageNo
   } = params
-  console.log(clientId)
   return await axios.get(`${API}/admin/allClient.action`, {
     params: {
       adminId,

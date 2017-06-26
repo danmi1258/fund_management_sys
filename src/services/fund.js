@@ -102,6 +102,24 @@ const update = async ({ id, name, status, desc }, {adminId, typeId, token}) => {
   })
 }
 
+/**
+ * [修改基金状态]
+ * @param  {[type]} options.adminId    [description]
+ * @param  {[type]} options.fundId     [description]
+ * @param  {[type]} options.fundStatus [description]
+ * @return {[type]}                    [description]
+ */
+const modifyStatus = async ({ adminId, fundId, fundStatus, token}) => {
+  console.log(111)
+  return await axios.get(`${API}/admin/adminModifyFundStatus.action`, {
+    params: {
+      adminId,
+      'fund.FundNo': fundId,
+      fundStatus,
+      token
+    }
+  })
+}
 
 
 export {
@@ -109,5 +127,6 @@ export {
   get,
   remove,
   update,
-  batchRemove
+  batchRemove,
+  modifyStatus
 }

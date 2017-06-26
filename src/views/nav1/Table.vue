@@ -34,7 +34,14 @@
     </el-col>
 
 		<!--列表-->
-		<el-table :data="funds" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 100%;">
+		<el-table
+      :data="funds"
+      highlight-current-row
+      v-loading="listLoading"
+      @selection-change="selsChange"
+      style="width: 100%;"
+      :row-class-name="tableRowClassName"
+    >
 
 			<el-table-column type="selection" width="55">
 			</el-table-column>
@@ -52,6 +59,8 @@
 
 			<el-table-column label="操作">
 				<template scope="scope">
+          <el-button type="danger" v-if="scope.row.fundStatus === '未上市'" size="small" @click="frozenOrActive(scope.$index, scope.row)">基金上市</el-button>
+          <el-button type="success" v-if="scope.row.fundStatus === '已上市'" size="small" @click="frozenOrActive(scope.$index, scope.row)">基金下市</el-button>
 					<el-button type="primary" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
 					<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
 				</template>
@@ -87,13 +96,12 @@
             </el-option>
           </el-select>
         </el-form-item>
-				<el-form-item label="基金状态">
-          <!-- <el-radio class="radio" v-model="editForm.status" label="已上市">已上市</el-radio> -->
+<!-- 				<el-form-item label="基金状态" disabled>
 					<el-radio-group v-model="editForm.status">
 						<el-radio class="radio" label="已上市">上市</el-radio>
 						<el-radio class="radio" label="未上市">未上市</el-radio>
 					</el-radio-group>
-				</el-form-item>
+				</el-form-item> -->
 				<el-form-item label="成立时间">
 					<el-date-picker type="date" placeholder="选择日期" v-model="editForm.date" disabled></el-date-picker>
 				</el-form-item>
@@ -147,7 +155,8 @@ import {
   get as getFund,
   remove as removeFund,
   update as updateFund,
-  batchRemove as batchRemoveFund
+  batchRemove as batchRemoveFund,
+  modifyStatus
 } from '@/services/fund'
 import { get as getTypes } from '@/services/fundTypes'
 
@@ -383,6 +392,49 @@ export default {
 
       });
       this.getFunds()
+    },
+    // 基金上下市控制
+    frozenOrActive(index, row) {
+      console.log(row)
+      const fundStatus = row.fundStatus === '已上市' ? 'false' : 'true'
+      const statusFont = row.fundStatus === '已上市' ? '下市' : '上市'
+      const token = storage.getSession('token')
+      const adminId = storage.getSession('userNo')
+      this.$confirm(`确认要 ${statusFont} 此款基金吗?`, '提示', {
+        type: 'warning'
+      }).then(async () => {
+        console.log(2222)
+        const res = await modifyStatus({
+          adminId,
+          fundStatus,
+          fundId: row.fundNo,
+          token
+        })
+        console.log(res)
+        if (res.resultcode === 0) {
+          this.$message({
+            message: `${statusFont} 此款基金成功`,
+            type: 'success'
+          })
+          this.getFunds()
+        } else {
+          this.$message({
+            message: message,
+            type: 'error'
+          })
+        }
+      }).catch(() => {
+          this.$message({
+            message: '服务器错误，已取消此次操作',
+            type: 'info'
+          })
+      });
+    },
+    tableRowClassName(row, index) {
+      if (row.fundStatus === '未上市') {
+        return 'fund-frozen-row';
+      }
+      return '';
     }
   },
   mounted() {
