@@ -37,10 +37,9 @@
       :row-class-name="tableRowClassName"
     >
       <el-table-column prop="transId" label="交易号" width="100" sortable />
-      <el-table-column prop="clientUser.clientId" label="用户账号" width="140" sortable />
-      <el-table-column prop="clientUser.clientName" label="姓名" width="120" sortable>
-      </el-table-column>
-      <el-table-column prop="targetId" label="目标账户" width="140" sortable>
+      <el-table-column prop="clientUser.clientName" label="姓名" width="120" sortable />
+      <el-table-column prop="clientUser.clientId" label="用户账号" sortable />
+      <el-table-column prop="targetId" label="目标账户" sortable>
       </el-table-column>
       </el-table-column>
       <el-table-column prop="transType" label="交易类型" width="120" sortable>

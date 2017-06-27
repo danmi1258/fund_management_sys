@@ -3,12 +3,9 @@ import NotFound from '@/views/404.vue'
 import Home from '@/views/Home.vue'
 import Main from '@/views/Main.vue'
 import Table from '@/views/nav1/Table.vue'
-import Form from '@/views/nav1/Form.vue'
 import user from '@/views/nav2/user.vue'
 import types from '@/views/nav1/type'
 import userRecord from '@/views/nav2/userRecord.vue'
-import Page5 from '@/views/nav2/Page5.vue'
-import Page6 from '@/views/nav3/Page6.vue'
 import echarts from '@/views/charts/echarts.vue'
 import feature from '@/views/feature'
 import fundRecord from '@/views/nav1/fundRecord'
@@ -49,20 +46,6 @@ let routes = [{
       name: '基金类型管理'
     }]
   }, {
-  //   path: '/',
-  //   component: Home,
-  //   name: '客户管理',
-  //   iconCls: 'fa fa-id-card-o',
-  //   children: [{
-  //     path: '/page4',
-  //     component: Page4,
-  //     name: '页面4'
-  //   }, {
-  //     path: '/page5',
-  //     component: Page5,
-  //     name: '页面5'
-  //   }]
-  // }, {
     path: '/',
     component: Home,
     name: '客户管理',
@@ -80,12 +63,13 @@ let routes = [{
   }, {
     path: '/',
     component: Home,
-    name: 'Charts',
+    name: '统计中心',
+    leaf: true,
     iconCls: 'fa fa-bar-chart',
     children: [{
       path: '/echarts',
       component: echarts,
-      name: 'echarts'
+      name: '数据统计'
     }]
   }, {
     path: '*',

@@ -37,14 +37,14 @@
       style="width: 100%;"
       :row-class-name="tableRowClassName"
     >
-      <el-table-column prop="clientId" label="账号" width="130" sortable />
+      <el-table-column prop="clientId" label="账号" sortable />
       <el-table-column prop="clientName" label="姓名" width="120" sortable>
       </el-table-column>
       <el-table-column prop="sex" label="性别" width="90" sortable>
       </el-table-column>
-      <el-table-column prop="balance" label="余额 （元）" width="140" :formatter="formatBalance" sortable>
+      <el-table-column prop="balance" label="余额 （元）" :formatter="formatBalance" sortable>
       </el-table-column>
-      <el-table-column prop="email" label="邮箱号" width="120" sortable>
+      <el-table-column prop="email" label="邮箱号" sortable>
       </el-table-column>
       <el-table-column prop="phone" label="手机号" width="130" sortable>
       </el-table-column>

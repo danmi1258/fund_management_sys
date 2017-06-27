@@ -2,8 +2,6 @@ import { API } from '@/config'
 import axios from 'axios'
 
 const add = async ({ name, desc, date }, { adminId, typeId, token }) => {
-  console.log(typeId)
-  console.log(token)
   token = token.replace(/\"/g, "")
   const res = await axios.get(`${API}/admin/adminFundAdd.action`, {
     params: {
@@ -41,7 +39,6 @@ const get = async (params) => {
     currentPage: 5
   }
   params = Object.assign(DEAFULT, params)
-  console.log(params)
   const {
     fundId,
     fundName,

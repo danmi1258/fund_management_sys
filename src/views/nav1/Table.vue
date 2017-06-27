@@ -24,6 +24,11 @@
               :label="item.fundTypeName"
               :value="item.fundTypeId">
             </el-option>
+            <el-option
+              label="全部"
+              value=""
+            >
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -47,8 +52,7 @@
 			</el-table-column>
 			<el-table-column prop="fundNo" label="id" width="70" sortable>
 			</el-table-column>
-			<el-table-column prop="fundName" label="基金名" width="100" sortable>
-			</el-table-column>
+			<el-table-column prop="fundName" label="基金名" sortable/>
       <el-table-column prop="rate" label="年转化率" width="130" sortable :formatter="formatRate"/>
       <el-table-column prop="earnings" label="万份收益" width="120" sortable/>
       <el-table-column prop="fundType.fundTypeName" label="类型" width="100" sortable/>
@@ -173,7 +177,7 @@ export default {
       fundTypes: [],
       funds: [],
       total: 10,
-      pageSize: 3,
+      pageSize: 5,
       currentPage: 1,
       listLoading: false,
       sels: [], //列表选中列
@@ -403,32 +407,31 @@ export default {
       this.$confirm(`确认要 ${statusFont} 此款基金吗?`, '提示', {
         type: 'warning'
       }).then(async () => {
-        console.log(2222)
         const res = await modifyStatus({
           adminId,
           fundStatus,
           fundId: row.fundNo,
           token
         })
-        console.log(res)
         if (res.resultcode === 0) {
           this.$message({
             message: `${statusFont} 此款基金成功`,
             type: 'success'
           })
-          this.getFunds()
+          this.getFunds(this.currentPage)
         } else {
+          console.log('here')
           this.$message({
-            message: message,
+            message: res.message,
             type: 'error'
           })
         }
       }).catch(() => {
-          this.$message({
-            message: '服务器错误，已取消此次操作',
-            type: 'info'
-          })
-      });
+        this.$message({
+          message: '已取消此次操作',
+          type: 'info'
+        })
+      })
     },
     tableRowClassName(row, index) {
       if (row.fundStatus === '未上市') {

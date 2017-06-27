@@ -7,7 +7,7 @@
     <el-form-item prop="checkPass">
       <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off" placeholder="密码"></el-input>
     </el-form-item>
-    <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
+    <el-checkbox v-model="checked" class="remember">记住密码</el-checkbox>
     <el-form-item style="width:100%;">
       <el-button type="primary" style="width:100%;" @click.native.prevent="handleSubmit2" :loading="logining">登录</el-button>
       <!--<el-button @click.native.prevent="handleReset2">重置</el-button>-->
@@ -25,8 +25,8 @@ export default {
     return {
       logining: false,
       ruleForm2: {
-        account: 'admin',
-        checkPass: '123'
+        account: '',
+        checkPass: ''
       },
       rules2: {
         account: [{
@@ -42,7 +42,7 @@ export default {
           },
         ]
       },
-      checked: true
+      checked: false
     };
   },
   methods: {
@@ -56,10 +56,26 @@ export default {
         } = res.data
         storage.setSession('userNo', userNo)
         storage.setSession('token', token)
+        if (this.checked === true) {
+          storage.setLocal('fundmanagement_account', this.ruleForm2.account)
+          storage.setLocal('fundmanagement_pass', this.ruleForm2.checkPass)
+        } else {
+          storage.removeLocal('fundmanagement_account')
+          storage.removeLocal('fundmanagement_pass')
+        }
         this.$router.push({ path: '/table' })
       } else {
         this.$message(res.message)
       }
+    }
+  },
+  created() {
+    const account = storage.getLocal('fundmanagement_account')
+    const pass = storage.getLocal('fundmanagement_pass')
+    if (account && pass) {
+      this.ruleForm2.account = account
+      this.ruleForm2.checkPass = pass
+      this.checked = true
     }
   }
 }

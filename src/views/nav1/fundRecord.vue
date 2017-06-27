@@ -32,12 +32,12 @@
       :row-class-name="tableRowClassName"
     >
       <el-table-column prop="transId" label="交易号" width="100" sortable />
-      <el-table-column prop="clientUser.clientId" label="用户账号" width="120" sortable />
+      <el-table-column prop="clientUser.clientId" label="用户账号" sortable />
       <el-table-column prop="clientUser.clientName" label="姓名" width="120" sortable>
       </el-table-column>
       <el-table-column prop="fundNo" label="基金号" width="100" sortable>
       </el-table-column>
-      <el-table-column prop="fund.fundName" label="基金名称" width="120" sortable>
+      <el-table-column prop="fund.fundName" label="基金名称" sortable>
       </el-table-column>
       <el-table-column prop="transType" label="操作" width="100" sortable>
       </el-table-column>
@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     // 获取用户交易记录
-    async getUserRecords (pageNo = 1) {
+    async getFundRecords (pageNo = 1) {
       this.loading = true
       const token = storage.getSession('token')
       const adminId = storage.getSession('userNo')
@@ -108,7 +108,7 @@ export default {
       }
     },
     groupSearch() {
-      this.getUserRecords(this.currentPage)
+      this.getFundRecords(this.currentPage)
     },
     tableRowClassName(row, index) {
       if (row.active === false) {
@@ -134,11 +134,11 @@ export default {
   },
   watch: {
     currentPage(val) {
-      this.getUserRecords(val)
+      this.getFundRecords(val)
     }
   },
   mounted() {
-    this.getUserRecords()
+    this.getFundRecords()
   },
   filters: {
     filterStatusButton(val) {

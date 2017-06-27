@@ -33,13 +33,29 @@ const get = async (params) => {
       adminId,
       transId,
       transType,
-      clientNo: clientId,
+      'clientUser.ClientId': clientId,
       fundId,
       pageNo,
       token
     }
   })
 }
+
+/**
+ * [获取全部基金交易记录]
+ * @param  {[type]} options.adminId [description]
+ * @param  {[type]} options.token   [description]
+ * @return {[type]}                 [description]
+ */
+const all = async ({ adminId, token }) => {
+  return await axios.get(`${API}/fundtrans/loadFundTranInfos.action`, {
+    params: {
+      adminId,
+      token
+    }
+  })
+}
 export {
-  get
+  get,
+  all
 }
