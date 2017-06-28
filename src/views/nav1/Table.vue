@@ -100,12 +100,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-<!-- 				<el-form-item label="基金状态" disabled>
-					<el-radio-group v-model="editForm.status">
-						<el-radio class="radio" label="已上市">上市</el-radio>
-						<el-radio class="radio" label="未上市">未上市</el-radio>
-					</el-radio-group>
-				</el-form-item> -->
 				<el-form-item label="成立时间">
 					<el-date-picker type="date" placeholder="选择日期" v-model="editForm.date" disabled></el-date-picker>
 				</el-form-item>
@@ -151,7 +145,6 @@
 </template>
 
 <script>
-import util from '../../common/js/util'
 import storage from '@/utils/storage'
 import axios from 'axios'
 import {
